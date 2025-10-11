@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  sorteig-benefic:
+    build: .
+    ports:
+      - "${PUERTO:-8080}:80"
+    environment:
+      - PORT=${PUERTO:-8080}
+    container_name: sorteig-benefic
+    restart: unless-stopped
+    volumes:
+      # Opcional: montar directorio para logs
+      - ./logs:/var/log/nginx

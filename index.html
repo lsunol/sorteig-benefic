@@ -1,0 +1,533 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Sorteig Benèfic - Números Aleatoris</title>
+	<style>
+		body {
+			background: linear-gradient(135deg, #f8f9fc 0%, #e3e8f0 50%, #d1d9e6 100%), 
+			            url('logo-transparent.png') center/300px no-repeat;
+			background-attachment: fixed;
+			min-height: 100vh;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: flex-start;
+			font-family: 'Segoe UI', Arial, sans-serif;
+			margin: 0;
+			padding: 15px;
+			box-sizing: border-box;
+			position: relative;
+			overflow-x: hidden;
+		}
+		.main-container {
+			width: 100%;
+			max-width: 1200px;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			gap: 15px;
+		}
+		body::before {
+			content: '';
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background: rgba(142, 68, 173, 0.08);
+			z-index: -1;
+		}
+		h1 {
+			color: #6c5ce7;
+			margin-bottom: 10px;
+			text-shadow: 2px 2px 8px rgba(255,255,255,0.8);
+			font-size: 3rem;
+			text-align: center;
+			margin-top: 10px;
+		}
+		.slot-machine {
+			display: flex;
+			gap: 10px;
+			margin: 30px 0;
+		}
+		.digit {
+			width: 120px;
+			height: 180px;
+			background: #ffffff;
+			border-radius: 20px;
+			box-shadow: 0 8px 32px rgba(108, 92, 231, 0.15), 0 2px 8px rgba(108, 92, 231, 0.1);
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-size: 6rem;
+			color: #2d3748;
+			font-weight: bold;
+			transition: all 0.3s ease;
+			border: 3px solid #e2e8f0;
+			user-select: none;
+		}
+		.digit.winner {
+			background: #6c5ce7;
+			color: #ffffff;
+			border-color: #5a4fcf;
+			box-shadow: 0 12px 40px rgba(108, 92, 231, 0.4), 0 0 20px rgba(108, 92, 231, 0.3);
+			transform: scale(1.05);
+		}
+		button {
+			background: linear-gradient(135deg, #6c5ce7, #5a4fcf);
+			color: #ffffff;
+			border: none;
+			border-radius: 16px;
+			padding: 24px 60px;
+			font-size: 1.6rem;
+			font-weight: bold;
+			cursor: pointer;
+			box-shadow: 0 8px 32px rgba(108, 92, 231, 0.3), 0 2px 8px rgba(108, 92, 231, 0.2);
+			transition: all 0.3s ease;
+			margin: 10px 0;
+		}
+		button:hover {
+			background: linear-gradient(135deg, #5a4fcf, #4c43d4);
+			transform: translateY(-3px);
+			box-shadow: 0 12px 40px rgba(108, 92, 231, 0.4), 0 4px 12px rgba(108, 92, 231, 0.3);
+		}
+		button:active {
+			background: linear-gradient(135deg, #4c43d4, #3730a3);
+			transform: translateY(-1px);
+		}
+		.winners-section {
+			margin-top: 15px;
+			width: 90%;
+			max-width: 800px;
+		}
+		.winners-title {
+			color: #6c5ce7;
+			font-size: 1.8rem;
+			font-weight: bold;
+			margin-bottom: 10px;
+			text-align: center;
+			text-shadow: 1px 1px 4px rgba(255,255,255,0.8);
+		}
+		.winners-list {
+			background: #ffffff;
+			border-radius: 16px;
+			padding: 15px;
+			box-shadow: 0 6px 24px rgba(108, 92, 231, 0.1), 0 2px 8px rgba(108, 92, 231, 0.05);
+			max-height: 200px;
+			overflow-y: auto;
+			border: 2px solid #e2e8f0;
+		}
+		.winner-number {
+			display: inline-block;
+			background: linear-gradient(135deg, #6c5ce7, #5a4fcf);
+			color: white;
+			padding: 8px 12px;
+			margin: 4px;
+			border-radius: 8px;
+			font-weight: bold;
+			font-size: 0.9rem;
+			box-shadow: 0 3px 8px rgba(108, 92, 231, 0.2);
+			transition: transform 0.2s ease;
+		}
+		.winner-number:hover {
+			transform: scale(1.05);
+			box-shadow: 0 4px 12px rgba(108, 92, 231, 0.3);
+		}
+		.controls {
+			margin-top: 15px;
+			display: flex;
+			gap: 15px;
+			flex-wrap: wrap;
+			justify-content: center;
+			align-items: flex-start;
+		}
+		.control-btn {
+			background: linear-gradient(135deg, #718096, #4a5568);
+			color: #ffffff;
+			border: none;
+			border-radius: 8px;
+			padding: 10px 20px;
+			font-size: 0.9rem;
+			cursor: pointer;
+			transition: all 0.2s ease;
+			box-shadow: 0 3px 8px rgba(74, 85, 104, 0.2);
+		}
+		.control-btn:hover {
+			background: linear-gradient(135deg, #4a5568, #2d3748);
+			transform: translateY(-1px);
+			box-shadow: 0 4px 12px rgba(74, 85, 104, 0.3);
+		}
+		.config-section {
+			background: #ffffff;
+			border-radius: 12px;
+			padding: 10px 14px;
+			box-shadow: 0 3px 12px rgba(108, 92, 231, 0.1), 0 1px 4px rgba(108, 92, 231, 0.05);
+			border: 2px solid #e2e8f0;
+			display: flex;
+			align-items: center;
+			gap: 8px;
+		}
+		.input-group {
+			display: flex;
+			gap: 8px;
+			align-items: center;
+		}
+		.input-container {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+		}
+		.input-label {
+			color: #4a5568;
+			font-size: 0.7rem;
+			font-weight: bold;
+			margin-bottom: 2px;
+		}
+		.range-input {
+			width: 50px;
+			padding: 4px 6px;
+			border: 2px solid #e2e8f0;
+			border-radius: 6px;
+			text-align: center;
+			font-size: 0.8rem;
+			font-weight: bold;
+			color: #2d3748;
+			background: #ffffff;
+			transition: all 0.2s ease;
+		}
+		.range-input:focus {
+			outline: none;
+			border-color: #6c5ce7;
+			box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.1);
+		}
+		.apply-btn {
+			background: linear-gradient(135deg, #48bb78, #38a169);
+			color: white;
+			border: none;
+			border-radius: 6px;
+			padding: 6px 12px;
+			font-size: 0.8rem;
+			font-weight: bold;
+			cursor: pointer;
+			transition: all 0.2s ease;
+			white-space: nowrap;
+			box-shadow: 0 2px 6px rgba(72, 187, 120, 0.2);
+		}
+		.apply-btn:hover {
+			background: linear-gradient(135deg, #38a169, #2f855a);
+			transform: translateY(-1px);
+			box-shadow: 0 3px 8px rgba(72, 187, 120, 0.3);
+		}
+
+		/* Media Queries para Responsividad */
+		@media (max-width: 768px) {
+			body {
+				padding: 10px;
+			}
+			h1 {
+				font-size: 2rem;
+				margin-top: 5px;
+				margin-bottom: 5px;
+			}
+			.slot-machine {
+				gap: 8px;
+			}
+			.digit {
+				width: 80px;
+				height: 120px;
+				font-size: 4rem;
+			}
+			button {
+				padding: 18px 40px;
+				font-size: 1.3rem;
+				margin: 8px 0;
+			}
+			.controls {
+				flex-direction: column;
+				gap: 10px;
+				margin-top: 10px;
+			}
+			.config-section {
+				order: -1;
+				justify-content: center;
+			}
+			.winners-section {
+				width: 95%;
+				margin-top: 10px;
+			}
+			.winners-list {
+				max-height: 150px;
+				padding: 12px;
+			}
+			.winners-title {
+				margin-bottom: 8px;
+			}
+		}
+
+		@media (max-width: 480px) {
+			h1 {
+				font-size: 1.5rem;
+			}
+			.slot-machine {
+				gap: 5px;
+			}
+			.digit {
+				width: 60px;
+				height: 90px;
+				font-size: 3rem;
+			}
+			button {
+				padding: 15px 30px;
+				font-size: 1.1rem;
+			}
+			.config-section {
+				flex-wrap: wrap;
+				justify-content: center;
+				gap: 5px;
+			}
+			.input-container {
+				margin: 2px;
+			}
+			.range-input {
+				width: 45px;
+				font-size: 0.75rem;
+			}
+			.apply-btn {
+				padding: 5px 10px;
+				font-size: 0.75rem;
+			}
+			.control-btn {
+				padding: 8px 15px;
+				font-size: 0.8rem;
+			}
+		}
+
+		@media (min-width: 1200px) {
+			.digit {
+				width: 140px;
+				height: 200px;
+				font-size: 7rem;
+			}
+			button {
+				padding: 28px 70px;
+				font-size: 1.8rem;
+			}
+			h1 {
+				font-size: 4rem;
+			}
+		}
+	</style>
+</head>
+<body>
+	<div class="main-container">
+		<h1>Sorteig Benèfic Torneig He-Roi</h1>
+		<div class="slot-machine" id="slotMachine">
+			<div class="digit">0</div>
+			<div class="digit">0</div>
+			<div class="digit">0</div>
+		</div>
+		<button id="drawBtn">¡Girar i treure número!</button>
+		
+		<div class="winners-section">
+			<div class="winners-title">Números Premiats</div>
+			<div class="winners-list" id="winnersList">
+				<div style="text-align: center; color: #8e44ad; font-style: italic;">
+					Encara no hi ha números premiats
+				</div>
+			</div>
+			<div class="controls">
+				<button class="control-btn" id="saveBtn">Guardar Llista</button>
+				<button class="control-btn" id="resetBtn">Reiniciar Sorteig</button>
+				
+				<div class="config-section">
+					<div class="input-group">
+						<div class="input-container">
+							<div class="input-label">Mínim</div>
+							<input type="number" class="range-input" id="minInput" value="1" min="0" max="998">
+						</div>
+						<div class="input-container">
+							<div class="input-label">Màxim</div>
+							<input type="number" class="range-input" id="maxInput" value="999" min="1" max="9999">
+						</div>
+					</div>
+					<button class="apply-btn" id="applyRangeBtn">Aplicar</button>
+				</div>
+			</div>
+		</div>
+	</div>
+		<script src="rango.js"></script>
+		<script>
+			const slotMachine = document.getElementById('slotMachine');
+			const digits = slotMachine.querySelectorAll('.digit');
+			const btn = document.getElementById('drawBtn');
+			const winnersList = document.getElementById('winnersList');
+			const saveBtn = document.getElementById('saveBtn');
+			const resetBtn = document.getElementById('resetBtn');
+			const minInput = document.getElementById('minInput');
+			const maxInput = document.getElementById('maxInput');
+			const applyRangeBtn = document.getElementById('applyRangeBtn');
+			
+			let animating = false;
+			let drawnNumbers = [];
+			let minNumber = 1;
+			let maxNumber = 999;
+
+			function padNumber(num) {
+				const maxDigits = maxNumber.toString().length;
+				return num.toString().padStart(maxDigits, '0');
+			}
+
+			function updateDigitsDisplay(targetNum) {
+				const paddedNum = padNumber(targetNum);
+				const numDigits = paddedNum.length;
+				
+				// Ajustar el número de dígitos mostrados
+				const currentDigits = slotMachine.querySelectorAll('.digit');
+				while (currentDigits.length < numDigits) {
+					const newDigit = document.createElement('div');
+					newDigit.className = 'digit';
+					newDigit.textContent = '0';
+					slotMachine.appendChild(newDigit);
+				}
+				while (currentDigits.length > numDigits) {
+					slotMachine.removeChild(slotMachine.lastChild);
+				}
+				
+				return slotMachine.querySelectorAll('.digit');
+			}
+
+			function updateWinnersList() {
+				if (drawnNumbers.length === 0) {
+					winnersList.innerHTML = '<div style="text-align: center; color: #718096; font-style: italic;">Encara no hi ha números premiats</div>';
+				} else {
+					winnersList.innerHTML = drawnNumbers.map(num => 
+						`<span class="winner-number">${padNumber(num)}</span>`
+					).join('');
+				}
+			}
+
+			function saveWinnersToFile() {
+				const data = {
+					data: new Date().toLocaleString('ca-ES'),
+					numerosPremiats: drawnNumbers.map(num => padNumber(num)),
+					total: drawnNumbers.length
+				};
+				
+				const jsonData = JSON.stringify(data, null, 2);
+				const blob = new Blob([jsonData], { type: 'application/json' });
+				const url = URL.createObjectURL(blob);
+				
+				const a = document.createElement('a');
+				a.href = url;
+				a.download = `sorteig_benefic_${new Date().toISOString().split('T')[0]}.json`;
+				document.body.appendChild(a);
+				a.click();
+				document.body.removeChild(a);
+				URL.revokeObjectURL(url);
+			}
+
+			function animateDigits(targetNum) {
+				animating = true;
+				btn.disabled = true;
+				
+				const currentDigits = updateDigitsDisplay(targetNum);
+				currentDigits.forEach(d => d.classList.remove('winner'));
+				
+				const target = padNumber(targetNum).split('');
+				const numDigits = target.length;
+				let steps = Array.from({length: numDigits}, (_, i) => 30 + i * 10);
+				let intervals = [];
+				
+				for (let i = 0; i < numDigits; i++) {
+					let count = 0;
+					intervals[i] = setInterval(() => {
+						currentDigits[i].textContent = Math.floor(Math.random() * 10);
+						count++;
+						if (count >= steps[i]) {
+							clearInterval(intervals[i]);
+							currentDigits[i].textContent = target[i];
+							currentDigits[i].classList.add('winner');
+							if (i === numDigits - 1) {
+								animating = false;
+								btn.disabled = false;
+								drawnNumbers.push(targetNum);
+								updateWinnersList();
+								if (current >= numbers.length) {
+									btn.disabled = true;
+								}
+							}
+						}
+					}, 30 + i * 20);
+				}
+			}
+
+			function applyNewRange() {
+				const newMin = parseInt(minInput.value);
+				const newMax = parseInt(maxInput.value);
+				
+				if (newMin >= newMax) {
+					alert('El mínim ha de ser menor que el màxim!');
+					return;
+				}
+				
+				if (newMin < 0 || newMax > 9999) {
+					alert('El rang ha d\'estar entre 0 i 9999!');
+					return;
+				}
+				
+				minNumber = newMin;
+				maxNumber = newMax;
+				
+				// Reiniciar el sorteo con el nuevo rango
+				drawnNumbers = [];
+				resetNumbersWithRange();
+				updateWinnersList();
+				
+				// Resetear la visualización
+				const currentDigits = updateDigitsDisplay(minNumber);
+				currentDigits.forEach((d, i) => {
+					const paddedMin = padNumber(minNumber);
+					d.textContent = paddedMin[i] || '0';
+					d.classList.remove('winner');
+				});
+				
+				btn.disabled = false;
+			}
+
+			btn.addEventListener('click', () => {
+				if (animating) return;
+				const num = getNextNumber();
+				if (num === null) return;
+				animateDigits(num);
+			});
+
+			saveBtn.addEventListener('click', () => {
+				if (drawnNumbers.length === 0) {
+					alert('No hi ha números premiats per guardar.');
+					return;
+				}
+				saveWinnersToFile();
+			});
+
+			resetBtn.addEventListener('click', () => {
+				if (confirm('Estàs segur que vols reiniciar completament el sorteig?')) {
+					drawnNumbers = [];
+					resetNumbersWithRange();
+					updateWinnersList();
+					const currentDigits = updateDigitsDisplay(minNumber);
+					currentDigits.forEach((d, i) => {
+						const paddedMin = padNumber(minNumber);
+						d.textContent = paddedMin[i] || '0';
+						d.classList.remove('winner');
+					});
+					btn.disabled = false;
+				}
+			});
+
+			applyRangeBtn.addEventListener('click', applyNewRange);
+		</script>
+</body>
+</html>
