@@ -4,9 +4,9 @@ services:
   sorteig-benefic:
     build: .
     ports:
-      - "${PUERTO:-8080}:80"
+      - "${PUERTO:-7564}:80"
     environment:
-      - PORT=${PUERTO:-8080}
+      - PORT=${PUERTO:-7564}
     container_name: sorteig-benefic
     restart: unless-stopped
     volumes:
